@@ -8,10 +8,7 @@ An interactive 3D browser simulator that demonstrates two forms of relativistic 
 The user can select a celestial body, adjust spacecraft speed and distance, start/pause a mission, toggle an illustrative orbital animation, and compare a distant reference clock with the spacecraft clock.
 
 ## Live demo
-
-After enabling GitHub Pages, add your published URL here:
-
-`https://YOUR-USERNAME.github.io/Cosmic-Time-Explorer/`
+https://sushant0307-create.github.io/Cosmic-Time-Dilation/
 
 ## Features
 
