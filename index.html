@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="An interactive 3D educational simulator exploring special and gravitational time dilation." />
+  <meta name="theme-color" content="#07111f" />
+  <title>Cosmic Time Explorer | 3D Time Dilation Simulator</title>
+  <link rel="stylesheet" href="./style.css" />
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#">
+        <span class="brand-mark">CT</span>
+        <span><strong>COSMIC TIME EXPLORER</strong><small>RELATIVITY IN AN INTERACTIVE UNIVERSE</small></span>
+      </a>
+      <div class="topbar-right">
+        <span class="status-dot"></span><span class="status-text">3D SIMULATION</span>
+        <a class="github-link" href="https://github.com/" target="_blank" rel="noreferrer">GitHub ↗</a>
+      </div>
+    </header>
+
+    <main>
+      <section class="intro">
+        <div>
+          <p class="eyebrow">SPECIAL + GENERAL RELATIVITY</p>
+          <h1>Does time pass the same<br class="desktop-break"/> everywhere in the universe?</h1>
+          <p class="intro-copy">Pilot a spacecraft through different gravitational environments. Change its speed and position, then compare its clock with a distant reference clock.</p>
+        </div>
+        <div class="intro-chip"><span>●</span> EDUCATIONAL MODEL</div>
+      </section>
+
+      <section class="workspace">
+        <aside class="control-panel panel">
+          <div class="panel-heading">
+            <div><p class="eyebrow">MISSION SETUP</p><h2>Flight controls</h2></div>
+            <span class="panel-icon">⌘</span>
+          </div>
+
+          <label class="field-label" for="bodySelect">Celestial body</label>
+          <select id="bodySelect">
+            <option value="earth">Earth</option>
+            <option value="moon">Moon</option>
+            <option value="mars">Mars</option>
+            <option value="jupiter">Jupiter</option>
+            <option value="sun">Sun</option>
+            <option value="neutron">Neutron star (1.4 solar masses)</option>
+            <option value="blackhole">Black hole (10 solar masses)</option>
+          </select>
+
+          <div class="control-block">
+            <div class="label-row"><label for="speedSlider">Spacecraft speed</label><output id="speedOutput">80.0% c</output></div>
+            <input id="speedSlider" type="range" min="0" max="99.9" step="0.1" value="80" />
+            <div class="range-ends"><span>0</span><span>Near light speed</span></div>
+          </div>
+
+          <div class="control-block">
+            <div class="label-row"><label for="distanceSlider">Height above body</label><output id="distanceOutput">1.00 × radius</output></div>
+            <input id="distanceSlider" type="range" min="0.05" max="8" step="0.05" value="1" />
+            <div class="range-ends"><span>Closer</span><span>Farther</span></div>
+          </div>
+
+          <div class="control-block">
+            <div class="label-row"><label for="massSlider">Mass multiplier</label><output id="massOutput">1.00×</output></div>
+            <input id="massSlider" type="range" min="-1" max="2" step="0.01" value="0" />
+            <div class="range-ends"><span>0.1× mass</span><span>100× mass</span></div>
+          </div>
+
+          <div class="control-block">
+            <div class="label-row"><label for="rateSlider">Simulation time rate</label><output id="rateOutput">60×</output></div>
+            <input id="rateSlider" type="range" min="1" max="600" value="60" />
+            <div class="range-ends"><span>1 s / real second</span><span>600 s / real second</span></div>
+          </div>
+
+          <div class="button-row">
+            <button id="startButton" class="button button-primary">▶ Start mission</button>
+            <button id="resetButton" class="button button-secondary">↺ Reset</button>
+          </div>
+          <button id="orbitButton" class="button button-ghost">◎ Toggle orbital animation</button>
+          <div class="body-facts" id="bodyFacts"></div>
+          <p class="control-note">Drag the 3D scene to orbit the camera. Scroll to zoom. Use the distance slider to move the spacecraft closer to or farther from the body.</p>
+        </aside>
+
+        <section class="visual-column">
+          <div class="scene-panel panel">
+            <div class="scene-toolbar">
+              <div><p class="eyebrow">LIVE UNIVERSE</p><h2 id="sceneTitle">Earth system</h2></div>
+              <span class="live-badge"><i></i> LIVE VIEW</span>
+            </div>
+            <div id="sceneContainer" class="scene-container">
+              <div id="sceneLoading" class="scene-loading">Building your universe…</div>
+              <div class="scene-hint">DRAG TO ROTATE · SCROLL TO ZOOM</div>
+            </div>
+            <div class="scene-caption"><span class="legend-dot body-dot"></span> Celestial body <span class="legend-dot ship-dot"></span> Spacecraft <span class="legend-line"></span> Illustrative curvature grid</div>
+          </div>
+
+          <div class="clock-grid">
+            <article class="clock-card panel">
+              <div class="card-top"><span class="card-label">DISTANT REFERENCE CLOCK</span><span class="clock-symbol">◷</span></div>
+              <div class="clock-value" id="referenceClock">00:00:00</div>
+              <p>Coordinate time at a distant reference</p>
+            </article>
+            <article class="clock-card panel ship-clock">
+              <div class="card-top"><span class="card-label">SPACECRAFT CLOCK</span><span class="clock-symbol">◴</span></div>
+              <div class="clock-value" id="spacecraftClock">00:00:00</div>
+              <p>Proper time accumulated onboard</p>
+            </article>
+            <article class="clock-card panel difference-card">
+              <div class="card-top"><span class="card-label">TIME DIFFERENCE</span><span class="clock-symbol">Δt</span></div>
+              <div class="clock-value" id="timeDifference">0.000 s</div>
+              <p>Reference clock − spacecraft clock</p>
+            </article>
+          </div>
+        </section>
+      </section>
+
+      <section class="lower-grid">
+        <article class="panel physics-panel">
+          <p class="eyebrow">WHAT THE PHYSICS SAYS</p>
+          <h2>Why are the clocks different?</h2>
+          <p id="physicsExplanation">Choose a body and adjust the spacecraft controls to explore the two effects.</p>
+          <div class="effect-bars">
+            <div class="effect-row"><div><span>Velocity effect</span><strong id="velocityPercent">0.00%</strong></div><div class="bar-track"><span id="velocityBar" class="bar-fill velocity-fill"></span></div></div>
+            <div class="effect-row"><div><span>Gravity effect</span><strong id="gravityPercent">0.00%</strong></div><div class="bar-track"><span id="gravityBar" class="bar-fill gravity-fill"></span></div></div>
+            <div class="effect-row"><div><span>Combined clock rate</span><strong id="combinedPercent">100.00%</strong></div><div class="bar-track"><span id="combinedBar" class="bar-fill combined-fill"></span></div></div>
+          </div>
+        </article>
+
+        <article class="panel equation-panel">
+          <p class="eyebrow">SIMPLIFIED SCHWARZSCHILD MODEL</p>
+          <h2>Clock-rate calculation</h2>
+          <div class="equation">dτ / dt = √(1 − r<sub>s</sub>/r) × √(1 − v²/c²)</div>
+          <div class="equation-key">
+            <p><b>r<sub>s</sub></b> — Schwarzschild radius of the body</p>
+            <p><b>r</b> — spacecraft distance from the body's centre</p>
+            <p><b>v</b> — speed measured by a local stationary observer</p>
+            <p><b>c</b> — speed of light</p>
+          </div>
+          <p class="model-note">The rubber-sheet-style grid is a visual analogy, not a literal 4D spacetime diagram. The displayed grid distortion is intentionally exaggerated so it can be seen.</p>
+        </article>
+      </section>
+    
+      <section class="gravity-section">
+        <article class="panel gravity-panel">
+          <div class="gravity-head">
+            <div><p class="eyebrow">MASS &amp; GRAVITY</p><h2 id="gravTitle">Earth: mass and gravitational force</h2></div>
+            <div class="mass-input"><label for="shipMass">Spacecraft mass</label><div><input id="shipMass" type="number" min="1" step="100" value="1000" /> <span>kg</span></div></div>
+          </div>
+          <div class="grav-grid" id="gravGrid"></div>
+          <p class="model-note">Newtonian values from F = GMm/r². Mass and radius come from the selected body (with your mass multiplier). Distances use the spacecraft's current height.</p>
+        </article>
+      </section>
+
+      <section class="compare-grid">
+        <article class="panel compare-panel">
+          <p class="eyebrow">COMPARE WORLDS</p>
+          <h2>Same spacecraft, different bodies</h2>
+          <p class="compare-copy">Each row uses your current height and speed. Click a row to select that body. The mass multiplier applies to the selected body only.</p>
+          <div class="table-wrap">
+            <table id="compareTable">
+              <thead><tr><th>Body</th><th>Mass</th><th>Radius</th><th>Gravity slows clock by</th><th>Ship clock behind after 1 year</th></tr></thead>
+              <tbody id="compareBody"></tbody>
+            </table>
+          </div>
+        </article>
+        <article class="panel chart-panel">
+          <p class="eyebrow">LIVE DATA</p>
+          <h2>Time difference during the mission</h2>
+          <canvas id="diffChart" height="230"></canvas>
+          <p class="model-note">Press Start mission to record. The curve steepens when you raise speed, add mass or move closer to the body.</p>
+        </article>
+      </section>
+    </main>
+
+    <footer>BUILT FOR LEARNING · COSMIC TIME EXPLORER · NOT A NAVIGATION OR FLIGHT TOOL</footer>
+  </div>
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>
