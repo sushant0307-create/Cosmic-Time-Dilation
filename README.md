@@ -116,5 +116,4 @@ An internet connection is required to load Three.js and the optional Google Font
 - Educational mission challenges and comparison charts.
 
 ## Author
-
-Add your name, course, institution and project/team details here.
+Sushant Yadav
